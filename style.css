@@ -1,36 +1,214 @@
-body{
+* {
+    box-sizing: border-box;
     margin: 0;
+    padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f8fafc;
+    color: #334155;
+    font-size: 14px;
     display: flex;
     flex-direction: column;
 }
 
-header{
+header {
     display: flex;
-    height: 120px;
-    width: 100%;
     justify-content: center;
     align-items: center;
-    background-color: #003b4d;
+    margin-bottom: 20px;
+    background-color: #ffffff;
+    height: 100px;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
-header h1{
-    color: white;
-    font-size: 42px;
+header h1 {
+    font-size: 36px;
+    margin-bottom: 5px;
+    color: #0f172a;
 }
 
-main{
+main {
     display: flex;
     flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 30px;
+    height: 100%;
+    width: 100%;
+}
+
+main h2 {
+    font-size: 28px;
+    font-weight: bold;
+    color: #1e293b;
+}
+
+.incidentForm {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 20px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    gap: 25px;
+    box-shadow: 0 1px 12px rgba(0, 0, 0, 0.05);
+    width: 60%;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.camera{
+    width: 100%;
+}
+
+label {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+input[type="text"],
+input[type="email"],
+select,
+textarea {
+    background-color: #f8fafc;
+    border: 1px solid #cbd5e1;
+    color: #1e293b;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #3b82f6;
+    background-color: #ffffff;
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.help-text {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 5px;
+}
+
+.camera-box {
+    background-color: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    min-height: 250px;
+    margin-bottom: 15px;
+    display: flex;
     align-items: center;
-    background-color: #124453;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
 }
 
-.incident{
-    height: 750px;
-    width: 70%;
+#videoElement {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.incidentForm{
+.btn-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
 
+button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: #ffffff;
+    transition: background-color 0.2s ease;
+}
+
+.btn-primary {
+    background-color: #3b82f6;
+    border-color: #2563eb;
+}
+
+.btn-primary:hover {
+    background-color: #2563eb;
+}
+
+.btn-secondary {
+    background-color: #64748b;
+    border-color: #475569;
+}
+
+.btn-secondary:hover {
+    background-color: #475569;
+}
+
+.btn-danger {
+    background-color: #ef4444;
+    border-color: #dc2626;
+    color: #ffffff;
+}
+
+.btn-danger:hover {
+    background-color: #dc2626;
+}
+
+.btn-success {
+    background-color: #10b981;
+    border-color: #059669;
+}
+
+.btn-success:hover {
+    background-color: #059669;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 25px;
+}
+
+.file-upload {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+}
+
+.hidden-file-input {
+    display: none;
+}
+
+.form-actions button {
+    width: 48%;
+    padding: 12px;
+}
+
+.hidden-fields {
+    display: none;
 }

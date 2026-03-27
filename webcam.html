@@ -11,15 +11,77 @@
 
 <body>
     <header>
-        <h1>Incident Record</h1>
+        <h1>Incident report</h1>
     </header>
     <main>
-        <div class="incident">
-            <form class="incidentForm">
-                <input type="text" id="name">
-                <input type="text">
-            </form>
-        </div>
+        <h2>Nové hlášení</h2>
+        <form class="incidentForm" id="incidentForm">
+            <div class="details">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reporterName">Jméno</label>
+                        <input type="text" id="reporterName" placeholder="Jan Novák" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reporterEmail">E-mail</label>
+                        <input type="email" id="reporterEmail" placeholder="petr.novak@gmail.com"
+                            placeholder="jan.novak@example.com" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="category">Kategorie</label>
+                        <select id="category" required>
+                            <option value="">— vyber —</option>
+                            <option value="Úklid">Úklid</option>
+                            <option value="Technika">Technika</option>
+                            <option value="Bezpečnost">Bezpečnost</option>
+                            <option value="Jiné">Jiné</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Místo</label>
+                        <input type="text" id="location" placeholder="Vítězné nám.">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="description">Popis</label>
+                <textarea id="description" placeholder="Stručně a jasně popiš problém..." required></textarea>
+                <span class="help-text">Minimálně 10 znaků. Neuváděj citlivé osobní údaje, pokud nejsou
+                    nezbytné.</span>
+            </div>
+
+            <div class="form-group camera">
+                <label>Fotografie</label>
+                <div class="camera-box">
+                    <video id="videoElement" autoplay></video>
+                    <canvas id="canvasElement" style="display: none;"></canvas>
+                </div>
+                <div class="btn-group" style="justify-content: space-between;">
+                    <div class="btn-group">
+                        <button type="button" class="btn-primary" id="startButton">Zapnout kameru</button>
+                        <button type="button" class="btn-secondary" id="captureButton">Vyfotit</button>
+                        <label class="btn-secondary file-upload">
+                            <input type="file" accept="image/*" class="hidden-file-input">
+                            Nahrát soubor
+                        </label>
+                    </div>
+                    <span style="font-size: 12px; color: #94a3b8; align-self: center;">Bez fotky</span>
+                </div>
+            </div>
+
+            <div class="hidden-fields">
+                <input type="text" id="imagebase64">
+                <input type="text" id="gps">
+            </div>
+            <!--
+            <div class="form-actions">
+                <button type="button" class="btn-primary">Uložit lokálně</button>
+                <button type="submit" class="btn-success">Odeslat na server</button>
+            </div>-->
+        </form>
     </main>
 
     <!--<h1>Webcam Capture</h1>
