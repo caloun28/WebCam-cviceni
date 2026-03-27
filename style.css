@@ -49,13 +49,14 @@ main h2 {
 .incidentForm {
     display: flex;
     flex-wrap: wrap;
+    justify-content: space-between;
     padding: 20px;
     background-color: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     gap: 25px;
     box-shadow: 0 1px 12px rgba(0, 0, 0, 0.05);
-    width: 60%;
+    width: 50%;
 }
 
 .form-row {
@@ -71,13 +72,13 @@ main h2 {
     margin-bottom: 15px;
 }
 
-.camera{
+.camera {
     width: 100%;
 }
 
 label {
-    font-size: 12px;
-    color: #64748b;
+    font-size: 14px;
+    color: #526073;
     margin-bottom: 8px;
     font-weight: 500;
 }
@@ -86,7 +87,7 @@ input[type="text"],
 input[type="email"],
 select,
 textarea {
-    background-color: #f8fafc;
+    background-color: #eef7ff;
     border: 1px solid #cbd5e1;
     color: #1e293b;
     padding: 10px 12px;
@@ -115,7 +116,7 @@ textarea {
 }
 
 .camera-box {
-    background-color: #f8fafc;
+    background-color: #eef7ff;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
     min-height: 250px;
@@ -139,7 +140,8 @@ textarea {
     flex-wrap: wrap;
 }
 
-button {
+button,
+.file-upload {
     padding: 8px 16px;
     border-radius: 6px;
     border: 1px solid transparent;
@@ -168,23 +170,21 @@ button {
     background-color: #475569;
 }
 
-.btn-danger {
-    background-color: #ef4444;
-    border-color: #dc2626;
-    color: #ffffff;
+.btn-clear {
+    background-color: #ff3333;
+    border-color: #7b0000;
 }
 
-.btn-danger:hover {
-    background-color: #dc2626;
+.send {
+    background-color: #16943a;
 }
 
-.btn-success {
-    background-color: #10b981;
-    border-color: #059669;
+.send:hover {
+    background-color: #0f6627;
 }
 
-.btn-success:hover {
-    background-color: #059669;
+.btn-clear:hover {
+    background-color: #bf2626;
 }
 
 .form-actions {

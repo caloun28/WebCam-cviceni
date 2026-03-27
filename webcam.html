@@ -61,12 +61,14 @@
                 </div>
                 <div class="btn-group" style="justify-content: space-between;">
                     <div class="btn-group">
+                        <button type="submit" class="btn-primary send" id="submitButton">Odeslat</button>
                         <button type="button" class="btn-primary" id="startButton">Zapnout kameru</button>
                         <button type="button" class="btn-secondary" id="captureButton">Vyfotit</button>
                         <label class="btn-secondary file-upload">
                             <input type="file" accept="image/*" class="hidden-file-input">
                             Nahrát soubor
                         </label>
+                        <button type="button" class="btn-clear" id="clearButton">Smazat fotku</button>
                     </div>
                     <span style="font-size: 12px; color: #94a3b8; align-self: center;">Bez fotky</span>
                 </div>
@@ -76,11 +78,6 @@
                 <input type="text" id="imagebase64">
                 <input type="text" id="gps">
             </div>
-            <!--
-            <div class="form-actions">
-                <button type="button" class="btn-primary">Uložit lokálně</button>
-                <button type="submit" class="btn-success">Odeslat na server</button>
-            </div>-->
         </form>
     </main>
 
