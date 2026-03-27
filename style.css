@@ -1,0 +1,36 @@
+body{
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+header{
+    display: flex;
+    height: 120px;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    background-color: #003b4d;
+}
+
+header h1{
+    color: white;
+    font-size: 42px;
+}
+
+main{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #124453;
+}
+
+.incident{
+    height: 750px;
+    width: 70%;
+}
+
+.incidentForm{
+
+}
