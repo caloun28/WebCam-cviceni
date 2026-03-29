@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const res = await fetch("http://wa3lm.dev.spsejecna.net/incident/api.php", {
+                const res = await fetch("https://wa3lm.dev.spsejecna.net/incident/api.php", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Funkce 3: Načtení dat z API
         async function loadOperatorData() {
             try {
-                const response = await fetch("http://wa3lm.dev.spsejecna.net/incident/select.php", {
+                const response = await fetch("https://wa3lm.dev.spsejecna.net/incident/select.php", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
