@@ -130,10 +130,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById("incidentForm").addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        if (images.length === 0) {
-            alert("Musíš přidat alespoň 1 fotku");
-            return;
-        }
 
         const reporterName = document.getElementById("reporterName").value;
         const reporterEmail = document.getElementById("reporterEmail").value;
@@ -180,5 +176,126 @@ document.addEventListener('DOMContentLoaded', () => {
         images = [];
     });
 
+    const mapElement = document.getElementById('map');
+
+    if (mapElement) {
+        // Nastavení mapy
+        const map = L.map('map').setView([49.8, 15.5], 7);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        let incidentMarkers = L.layerGroup().addTo(map);
+        let allIncidents = [];
+
+        const searchInput = document.getElementById('operatorSearch');
+        const datalist = document.getElementById('searchSuggestions');
+        const tableBody = document.querySelector('#incidentsTable tbody');
+
+        // Funkce 1: Vykreslení dat (tabulka + mapa) - MUSÍ BÝT DEFINOVÁNA ZDE
+        function renderData(dataArray) {
+            if (!tableBody) return;
+            tableBody.innerHTML = '';
+            incidentMarkers.clearLayers();
+
+            dataArray.forEach(incident => {
+                // Přidání do tabulky
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${incident.id}</td>
+                    <td>${incident.reporter_name}</td>
+                    <td>${incident.category}</td>
+                    <td>${incident.location || '-'}</td>
+                    <td>${incident.created_at}</td>
+                `;
+                tableBody.appendChild(tr);
+
+                // Přidání na mapu
+                if (incident.gps) {
+                    const coords = incident.gps.split(',');
+                    if (coords.length === 2) {
+                        const lat = parseFloat(coords[0].trim());
+                        const lng = parseFloat(coords[1].trim());
+
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            L.marker([lat, lng])
+                                .bindPopup(`<b>${incident.category}</b><br>${incident.reporter_name}<br>${incident.location || ''}`)
+                                .addTo(incidentMarkers);
+                        }
+                    }
+                }
+            });
+        }
+
+        // Funkce 2: Sestavení našeptávače (ZDE JSEM ODEBRAL ČASY PRO PŘEHLEDNOST)
+        function buildDatalist(dataArray) {
+            if (!datalist) return;
+            const suggestions = new Set();
+
+            dataArray.forEach(incident => {
+                if (incident.reporter_name) suggestions.add(incident.reporter_name);
+                if (incident.category) suggestions.add(incident.category);
+                if (incident.location) suggestions.add(incident.location);
+                // Časy už do našeptávače nepřidáváme
+            });
+
+            datalist.innerHTML = '';
+            suggestions.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                datalist.appendChild(option);
+            });
+        }
+
+        // Funkce 3: Načtení dat z API
+        async function loadOperatorData() {
+            try {
+                const response = await fetch("http://wa3lm.dev.spsejecna.net/incident/select.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        "select": ["id", "reporter_name", "category", "location", "created_at", "gps"],
+                        "orderBy": { "column": "created_at", "direction": "DESC" },
+                        "limit": 100
+                    })
+                });
+
+                const rawData = await response.json();
+
+                if (rawData && rawData.success === true && Array.isArray(rawData.data)) {
+                    allIncidents = rawData.data;
+                } else {
+                    allIncidents = [];
+                }
+
+                buildDatalist(allIncidents);
+                renderData(allIncidents); // Zde se volá funkce renderData
+
+            } catch (err) {
+                console.error("Chyba při načítání dat operátora:", err);
+            }
+        }
+
+        // 4. Filtrace (když uživatel píše do pole)
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+
+                const filteredData = allIncidents.filter(item => {
+                    return (
+                        (item.reporter_name && item.reporter_name.toLowerCase().includes(query)) ||
+                        (item.location && item.location.toLowerCase().includes(query)) ||
+                        (item.created_at && item.created_at.toLowerCase().includes(query)) ||
+                        (item.category && item.category.toLowerCase().includes(query))
+                    );
+                });
+
+                renderData(filteredData); // Zde se znovu volá funkce renderData
+            });
+        }
+
+        // 5. Spuštění na začátku
+        loadOperatorData();
+    }
 
 });
