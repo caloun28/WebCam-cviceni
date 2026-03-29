@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mapElement = document.getElementById('map');
 
     if (mapElement) {
-        // Nastavení mapy
+
         const map = L.map('map').setView([49.8, 15.5], 7);
         L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
@@ -192,14 +192,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const datalist = document.getElementById('searchSuggestions');
         const tableBody = document.querySelector('#incidentsTable tbody');
 
-        // Funkce 1: Vykreslení dat (tabulka + mapa) - MUSÍ BÝT DEFINOVÁNA ZDE
         function renderData(dataArray) {
             if (!tableBody) return;
             tableBody.innerHTML = '';
             incidentMarkers.clearLayers();
 
             dataArray.forEach(incident => {
-                // Přidání do tabulky
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${incident.id}</td>
@@ -210,7 +209,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 tableBody.appendChild(tr);
 
-                // Přidání na mapu
                 if (incident.gps) {
                     const coords = incident.gps.split(',');
                     if (coords.length === 2) {
@@ -227,7 +225,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Funkce 2: Sestavení našeptávače (ZDE JSEM ODEBRAL ČASY PRO PŘEHLEDNOST)
         function buildDatalist(dataArray) {
             if (!datalist) return;
             const suggestions = new Set();
@@ -236,7 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (incident.reporter_name) suggestions.add(incident.reporter_name);
                 if (incident.category) suggestions.add(incident.category);
                 if (incident.location) suggestions.add(incident.location);
-                // Časy už do našeptávače nepřidáváme
             });
 
             datalist.innerHTML = '';
@@ -247,7 +243,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Funkce 3: Načtení dat z API
         async function loadOperatorData() {
             try {
                 const response = await fetch("http://wa3lm.dev.spsejecna.net/incident/select.php", {
@@ -269,14 +264,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 buildDatalist(allIncidents);
-                renderData(allIncidents); // Zde se volá funkce renderData
+                renderData(allIncidents);
 
             } catch (err) {
                 console.error("Chyba při načítání dat operátora:", err);
             }
         }
 
-        // 4. Filtrace (když uživatel píše do pole)
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
                 const query = e.target.value.toLowerCase();
@@ -290,11 +284,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     );
                 });
 
-                renderData(filteredData); // Zde se znovu volá funkce renderData
+                renderData(filteredData);
             });
         }
 
-        // 5. Spuštění na začátku
         loadOperatorData();
     }
 
