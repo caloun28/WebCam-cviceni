@@ -22,91 +22,84 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error accessing webcam:', error);
         }
     }
-    startButton.addEventListener('click', startWebcam);
+    if (startButton) startButton.addEventListener('click', startWebcam);
 
-    fileInput.addEventListener('change', async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
+    if (fileInput) {
+        fileInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
 
-        if (images.length >= maxImages) {
-            alert("Maximálně 3 fotky");
-            fileInput.value = '';
-            return;
-        }
-
-        const reader = new FileReader();
-
-        reader.onload = (e) => {
-            const img = new Image();
-            img.onload = async () => {
-
-                canvasElement.width = img.width;
-                canvasElement.height = img.height;
-
-
-                const ctx = canvasElement.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-
-
-                canvasElement.style.display = "block";
-                videoElement.style.display = "none";
-
-
-                let dataUrl = canvasElement.toDataURL('image/jpeg', 0.9);
-                dataUrl = await compressImage(dataUrl, 2 * 1024 * 1024);
-
-                images.push(dataUrl);
-
-
+            if (images.length >= maxImages) {
+                alert("Maximálně 3 fotky");
                 fileInput.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = async () => {
+                    canvasElement.width = img.width;
+                    canvasElement.height = img.height;
+
+                    const ctx = canvasElement.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+
+                    canvasElement.style.display = "block";
+                    videoElement.style.display = "none";
+
+                    let dataUrl = canvasElement.toDataURL('image/jpeg', 0.9);
+                    dataUrl = await compressImage(dataUrl, 2 * 1024 * 1024);
+
+                    images.push(dataUrl);
+                    fileInput.value = '';
+                };
+                img.src = e.target.result;
             };
-            img.src = e.target.result;
-        };
+            reader.readAsDataURL(file);
+        });
+    }
 
+    if (captureButton) {
+        captureButton.addEventListener('click', async () => {
+            if (images.length >= maxImages) {
+                alert("Maximalne 3 fotky");
+                return;
+            }
 
-        reader.readAsDataURL(file);
-    });
+            if (!videoElement.videoWidth) {
+                alert("Počkej než se načte kamera");
+                return;
+            }
 
+            canvasElement.width = videoElement.videoWidth;
+            canvasElement.height = videoElement.videoHeight;
 
-    captureButton.addEventListener('click', async () => {
-        if (images.length >= maxImages) {
-            alert("Maximalne 3 fotky");
-            return;
-        }
+            const ctx = canvasElement.getContext('2d');
+            ctx.drawImage(videoElement, 0, 0);
 
-        if (!videoElement.videoWidth) {
-            alert("Počkej než se načte kamera");
-            return;
-        }
+            canvasElement.style.display = "block";
+            videoElement.style.display = "none";
 
-        canvasElement.width = videoElement.videoWidth;
-        canvasElement.height = videoElement.videoHeight;
+            let dataUrl = canvasElement.toDataURL('image/jpeg', 0.9);
+            dataUrl = await compressImage(dataUrl, 2 * 1024 * 1024);
 
-        const ctx = canvasElement.getContext('2d');
-        ctx.drawImage(videoElement, 0, 0);
+            images.push(dataUrl);
+        });
+    }
 
-
-        canvasElement.style.display = "block";
-        videoElement.style.display = "none";
-
-        let dataUrl = canvasElement.toDataURL('image/jpeg', 0.9);
-        dataUrl = await compressImage(dataUrl, 2 * 1024 * 1024);
-
-        images.push(dataUrl);
-    });
-
-    clearButton.addEventListener('click', () => {
-        images = [];
-
-        canvasElement.style.display = "none";
-        videoElement.style.display = "block";
-
-        alert("Fotky smazany");
-    });
+    if (clearButton) {
+        clearButton.addEventListener('click', () => {
+            images = [];
+            canvasElement.style.display = "none";
+            videoElement.style.display = "block";
+            alert("Fotky smazany");
+        });
+    }
 
     async function compressImage(dataUrl, maxSize) {
         let quality = 0.9;
-
         while (getSize(dataUrl) > maxSize && quality > 0.1) {
             quality -= 0.1;
             dataUrl = canvasElement.toDataURL('image/jpeg', quality);
@@ -122,64 +115,71 @@ document.addEventListener('DOMContentLoaded', () => {
         return new Promise((resolve) => {
             navigator.geolocation.getCurrentPosition((pos) => {
                 resolve(`${pos.coords.latitude}, ${pos.coords.longitude}`);
-            }, () => resolve(null)
-            );
+            }, () => resolve(null));
         });
     }
 
-    document.getElementById("incidentForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
+    const incidentForm = document.getElementById("incidentForm");
+    if (incidentForm) {
+        incidentForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
 
+            const reporterName = document.getElementById("reporterName").value;
+            const reporterEmail = document.getElementById("reporterEmail").value;
+            const category = document.getElementById("category").value;
+            const location = document.getElementById("location").value;
+            const description = document.getElementById("description").value;
 
-        const reporterName = document.getElementById("reporterName").value;
-        const reporterEmail = document.getElementById("reporterEmail").value;
-        const category = document.getElementById("category").value;
-        const location = document.getElementById("location").value;
-        const description = document.getElementById("description").value;
+            const gps = await getGPS();
 
-        const gps = await getGPS();
-
-        if (description.length < 10) {
-            alert("Popis musí mít alespoň 10 znaků");
-            return;
-        }
-
-        for (let img of images) {
-            const body = {
-                reporterName,
-                reporterEmail,
-                category,
-                location,
-                description,
-                gps,
-                imageBase64: img
-            };
-
-            try {
-                const res = await fetch("http://wa3lm.dev.spsejecna.net/incident/api.php", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(body)
-                });
-
-                const data = await res.json();
-                console.log(data);
-
-            } catch (err) {
-                console.error("Chyba při odesílání:", err);
+            if (description.length < 10) {
+                alert("Popis musí mít alespoň 10 znaků");
+                return;
             }
-        }
 
-        alert("Odesláno!");
-        images = [];
-    });
+            if (images.length === 0) {
+                images.push("");
+            }
+
+            for (let img of images) {
+                const body = {
+                    reporterName,
+                    reporterEmail,
+                    category,
+                    location,
+                    description,
+                    gps,
+                    imageBase64: img
+                };
+
+                try {
+                    const res = await fetch("http://wa3lm.dev.spsejecna.net/incident/api.php", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(body)
+                    });
+
+                    const data = await res.json();
+                    console.log(data);
+
+                } catch (err) {
+                    console.error("Chyba při odesílání:", err);
+                }
+            }
+
+            alert("Odesláno!");
+            images = [];
+            canvasElement.style.display = "none";
+            videoElement.style.display = "block";
+            incidentForm.reset();
+        });
+    }
 
     const mapElement = document.getElementById('map');
 
     if (mapElement) {
-
         const map = L.map('map').setView([49.8, 15.5], 7);
         L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
@@ -192,13 +192,78 @@ document.addEventListener('DOMContentLoaded', () => {
         const datalist = document.getElementById('searchSuggestions');
         const tableBody = document.querySelector('#incidentsTable tbody');
 
+        const filterCategory = document.getElementById('filterCategory');
+        const filterLocation = document.getElementById('filterLocation');
+        const filterDateFrom = document.getElementById('filterDateFrom');
+        const saveFiltersBtn = document.getElementById('saveFiltersBtn');
+        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+
+        function loadFilters() {
+            const savedFilters = JSON.parse(localStorage.getItem('operatorFilters')) || {};
+            if (filterCategory) filterCategory.value = savedFilters.category || '';
+            if (filterLocation) filterLocation.value = savedFilters.location || '';
+            if (filterDateFrom) filterDateFrom.value = savedFilters.dateFrom || '';
+            return savedFilters;
+        }
+
+        function saveFilters() {
+            const filters = {
+                category: filterCategory ? filterCategory.value.trim() : '',
+                location: filterLocation ? filterLocation.value.trim() : '',
+                dateFrom: filterDateFrom ? filterDateFrom.value : ''
+            };
+            localStorage.setItem('operatorFilters', JSON.stringify(filters));
+            applyFiltersAndRender();
+        }
+
+        function applyFiltersAndRender() {
+            const filters = loadFilters();
+            let filteredData = allIncidents;
+
+            if (filters.category) {
+                filteredData = filteredData.filter(i => i.category && i.category.toLowerCase().includes(filters.category.toLowerCase()));
+            }
+            if (filters.location) {
+                filteredData = filteredData.filter(i => i.location && i.location.toLowerCase().includes(filters.location.toLowerCase()));
+            }
+            if (filters.dateFrom) {
+                filteredData = filteredData.filter(i => i.created_at && i.created_at >= filters.dateFrom);
+            }
+
+            const quickQuery = searchInput ? searchInput.value.toLowerCase() : '';
+            if (quickQuery) {
+                filteredData = filteredData.filter(item => {
+                    return (
+                        (item.reporter_name && item.reporter_name.toLowerCase().includes(quickQuery)) ||
+                        (item.location && item.location.toLowerCase().includes(quickQuery)) ||
+                        (item.created_at && item.created_at.toLowerCase().includes(quickQuery)) ||
+                        (item.category && item.category.toLowerCase().includes(quickQuery))
+                    );
+                });
+            }
+
+            renderData(filteredData);
+        }
+
+        if (saveFiltersBtn) saveFiltersBtn.addEventListener('click', saveFilters);
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener('click', () => {
+                localStorage.removeItem('operatorFilters');
+                loadFilters();
+                applyFiltersAndRender();
+            });
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', applyFiltersAndRender);
+        }
+
         function renderData(dataArray) {
             if (!tableBody) return;
             tableBody.innerHTML = '';
             incidentMarkers.clearLayers();
 
             dataArray.forEach(incident => {
-
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${incident.id}</td>
@@ -264,31 +329,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 buildDatalist(allIncidents);
-                renderData(allIncidents);
+                loadFilters();
+                applyFiltersAndRender();
 
             } catch (err) {
                 console.error("Chyba při načítání dat operátora:", err);
             }
         }
 
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                const query = e.target.value.toLowerCase();
-
-                const filteredData = allIncidents.filter(item => {
-                    return (
-                        (item.reporter_name && item.reporter_name.toLowerCase().includes(query)) ||
-                        (item.location && item.location.toLowerCase().includes(query)) ||
-                        (item.created_at && item.created_at.toLowerCase().includes(query)) ||
-                        (item.category && item.category.toLowerCase().includes(query))
-                    );
-                });
-
-                renderData(filteredData);
-            });
-        }
-
         loadOperatorData();
-    }
 
+        setInterval(loadOperatorData, 30000);
+    }
 });
