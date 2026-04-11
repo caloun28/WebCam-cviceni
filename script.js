@@ -9,9 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.querySelector('.hidden-file-input');
 
     let stream;
-    let images = [];
-    const maxImages = 3;
-
+    let capturedImage = "";
     async function startWebcam() {
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -28,12 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInput.addEventListener('change', async (event) => {
             const file = event.target.files[0];
             if (!file) return;
-
-            if (images.length >= maxImages) {
-                alert("Maximálně 3 fotky");
-                fileInput.value = '';
-                return;
-            }
 
             const reader = new FileReader();
 
@@ -52,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     let dataUrl = canvasElement.toDataURL('image/jpeg', 0.9);
                     dataUrl = await compressImage(dataUrl, 2 * 1024 * 1024);
 
-                    images.push(dataUrl);
+                    capturedImage = dataUrl;
                     fileInput.value = '';
                 };
                 img.src = e.target.result;
@@ -63,13 +55,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (captureButton) {
         captureButton.addEventListener('click', async () => {
-            if (images.length >= maxImages) {
-                alert("Maximalne 3 fotky");
-                return;
-            }
 
             if (!videoElement.videoWidth) {
-                alert("Počkej než se načte kamera");
+                const originalText = captureButton.textContent;
+                captureButton.textContent = "Zapněte kameru!";
+                captureButton.style.backgroundColor = "#dc2626";
+                setTimeout(() => {
+                    captureButton.textContent = originalText;
+                    captureButton.style.backgroundColor = "";
+                }, 3000);
                 return;
             }
 
@@ -83,18 +77,15 @@ document.addEventListener('DOMContentLoaded', () => {
             videoElement.style.display = "none";
 
             let dataUrl = canvasElement.toDataURL('image/jpeg', 0.9);
-            dataUrl = await compressImage(dataUrl, 2 * 1024 * 1024);
-
-            images.push(dataUrl);
+            capturedImage = await compressImage(dataUrl, 2 * 1024 * 1024);
         });
     }
 
     if (clearButton) {
         clearButton.addEventListener('click', () => {
-            images = [];
+            capturedImage = "";
             canvasElement.style.display = "none";
             videoElement.style.display = "block";
-            alert("Fotky smazany");
         });
     }
 
@@ -130,47 +121,73 @@ document.addEventListener('DOMContentLoaded', () => {
             const location = document.getElementById("location").value;
             const description = document.getElementById("description").value;
 
+            const submitBtn = incidentForm.querySelector('button[type="submit"]');
+
             const gps = await getGPS();
 
             if (description.length < 10) {
-                alert("Popis musí mít alespoň 10 znaků");
+                if (submitBtn) {
+                    const originalText = submitBtn.textContent;
+                    submitBtn.textContent = "Popis je moc krátký!";
+                    submitBtn.style.backgroundColor = "#dc2626";
+                    setTimeout(() => {
+                        submitBtn.textContent = originalText;
+                        submitBtn.style.backgroundColor = "";
+                    }, 3000);
+                }
                 return;
             }
 
-            if (images.length === 0) {
-                images.push("");
-            }
+            const fallbackImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
-            for (let img of images) {
-                const body = {
-                    reporterName,
-                    reporterEmail,
-                    category,
-                    location,
-                    description,
-                    gps,
-                    imageBase64: img
-                };
+            const body = {
+                reporterName,
+                reporterEmail,
+                category,
+                location,
+                description,
+                gps,
+                imageBase64: capturedImage || fallbackImage
+            };
 
-                try {
-                    const res = await fetch("http://wa3lm.dev.spsejecna.net/incident/api.php", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify(body)
-                    });
+            try {
+                const res = await fetch("http://wa3lm.dev.spsejecna.net/incident/api.php", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(body)
+                });
 
-                    const data = await res.json();
-                    console.log(data);
+                const data = await res.json();
+                console.log(data);
 
-                } catch (err) {
-                    console.error("Chyba při odesílání:", err);
+
+                if (submitBtn) {
+                    const originalText = submitBtn.textContent;
+                    submitBtn.textContent = "✔ Odesláno!";
+                    submitBtn.style.backgroundColor = "#16a34a";
+                    setTimeout(() => {
+                        submitBtn.textContent = originalText;
+                        submitBtn.style.backgroundColor = "";
+                    }, 3000);
+                }
+                if (typeof window.loadOperatorData === 'function') window.loadOperatorData();
+
+            } catch (err) {
+                console.error("Chyba při odesílání:", err);
+                if (submitBtn) {
+                    const originalText = submitBtn.textContent;
+                    submitBtn.textContent = "Chyba při odesílání!";
+                    submitBtn.style.backgroundColor = "#dc2626";
+                    setTimeout(() => {
+                        submitBtn.textContent = originalText;
+                        submitBtn.style.backgroundColor = "";
+                    }, 3000);
                 }
             }
 
-            alert("Odesláno!");
-            images = [];
+            capturedImage = "";
             canvasElement.style.display = "none";
             videoElement.style.display = "block";
             incidentForm.reset();
@@ -298,6 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (incident.reporter_name) suggestions.add(incident.reporter_name);
                 if (incident.category) suggestions.add(incident.category);
                 if (incident.location) suggestions.add(incident.location);
+                if (incident.created_at) suggestions.add(incident.created_at);
             });
 
             datalist.innerHTML = '';
